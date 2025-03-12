@@ -35,6 +35,20 @@
                     ]
                 }
             ]
+        },
+        {
+            "eventName": "push",
+            "githubActions": [
+                {
+                    "githubAction": "any",
+                    "youtrackCommand": [
+                        {
+                            "command": "Comment",
+                            "comment": "New push made: {{pusher.name}}"
+                        }
+                    ]
+                }
+            ]
         }
     ]
 }
