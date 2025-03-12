@@ -2,24 +2,30 @@
     "mappings": [
         {
             "githubAction": "opened",
-            "youtrackCommand": {
-                "command": "In Progress",
-                "comment": "PR opened - status updated by GitHub webhook"
-            }
+            "youtrackCommand": [
+                {
+                    "command": "In Progress",
+                    "comment": "PR opened - status updated by GitHub webhook"
+                }
+            ]
         },
         {
             "githubAction": "closed",
-            "youtrackCommand": {
-                "command": "Done",
-                "comment": "PR closed - status updated by GitHub webhook"
-            }
+            "youtrackCommand": [
+                {
+                    "command": "Done",
+                    "comment": "PR closed - status updated by GitHub webhook"
+                }
+            ]
         },
         {
             "githubAction": "reopened",
-            "youtrackCommand": {
-                "command": "In Progress",
-                "comment": "PR reopened - status updated by GitHub webhook"
-            }
+            "youtrackCommand": [
+                {
+                    "command": "In Progress",
+                    "comment": "PR reopened - status updated by GitHub webhook"
+                }
+            ]
         }
     ]
 }

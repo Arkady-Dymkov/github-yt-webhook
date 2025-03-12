@@ -13,7 +13,7 @@ import (
 
 // Client interface for YouTrack operations
 type Client interface {
-	ExecuteCommand(ticket string, command models.YouTrackCommand) error
+	ExecuteCommands(ticket string, commands []models.YouTrackCommand) error
 }
 
 // HTTPClient is the implementation of the Client interface
@@ -52,6 +52,16 @@ func NewClient(baseURL, token string) (*HTTPClient, error) {
 		token:   token,
 		client:  &http.Client{},
 	}, nil
+}
+
+func (c *HTTPClient) ExecuteCommands(ticket string, commands []models.YouTrackCommand) error {
+	for _, command := range commands {
+		var err = c.ExecuteCommand(ticket, command)
+		if err != nil {
+			return err
+		}
+	}
+	return nil
 }
 
 // ExecuteCommand executes a YouTrack command on an issue

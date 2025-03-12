@@ -1,14 +1,14 @@
 package models
 
-// ActionMapping defines a mapping between a GitHub action and a YouTrack command
-type ActionMapping struct {
-	GitHubAction    string          `json:"githubAction"`
-	YouTrackCommand YouTrackCommand `json:"youtrackCommand"`
+type YouTrackCommand struct {
+	Command string `json:"command"`
+	Comment string `json:"comment"`
 }
 
-type YouTrackCommand struct {
-	Command string
-	Comment string
+// ActionMapping defines a mapping between a GitHub action and a YouTrack command
+type ActionMapping struct {
+	GitHubAction    string            `json:"githubAction"`
+	YouTrackCommand []YouTrackCommand `json:"youtrackCommand"`
 }
 
 // ActionMappingConfig holds the configuration for GitHub action to YouTrack command mappings
