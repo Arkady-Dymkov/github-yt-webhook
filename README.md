@@ -11,6 +11,7 @@ A Golang application that updates YouTrack issues based on GitHub pull request e
 - Built with Gin framework for high performance
 - Comprehensive logging for debugging and monitoring
 
+
 ## Requirements
 
 - Go 1.20 or higher
