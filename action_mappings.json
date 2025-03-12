@@ -6,6 +6,10 @@
                 {
                     "command": "In Progress",
                     "comment": "PR opened - status updated by GitHub webhook"
+                },
+                {
+                    "command": "Comment",
+                    "comment": "Check commit here: {{html_url}}"
                 }
             ]
         },
