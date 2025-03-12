@@ -4,7 +4,8 @@
 *.dll
 *.so
 *.dylib
-github-yt-webhook
+github-webhook-youtrack
+
 
 # Test binary, built with `go test -c`
 *.test
