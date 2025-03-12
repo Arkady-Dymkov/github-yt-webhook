@@ -59,7 +59,7 @@ func (h *WebhookHandler) HandleGitHubWebhook(c *gin.Context) {
 	}
 
 	// Send request to YouTrack to update the issue status using the configured command
-	err := h.ytClient.ExecuteCommand(ticket, mapping.YouTrackCommand, mapping.Comment)
+	err := h.ytClient.ExecuteCommand(ticket, mapping.YouTrackCommand)
 	if err != nil {
 		log.Printf("Failed to update YouTrack issue %s: %v", ticket, err)
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update YouTrack issue"})

@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github-yt-webhook/internal/models"
 	"log"
 	"net/http"
 	"strings"
@@ -12,7 +13,7 @@ import (
 
 // Client interface for YouTrack operations
 type Client interface {
-	ExecuteCommand(ticket string, command string, comment string) error
+	ExecuteCommand(ticket string, command models.YouTrackCommand) error
 }
 
 // HTTPClient is the implementation of the Client interface
@@ -54,12 +55,12 @@ func NewClient(baseURL, token string) (*HTTPClient, error) {
 }
 
 // ExecuteCommand executes a YouTrack command on an issue
-func (c *HTTPClient) ExecuteCommand(ticket string, command string, comment string) error {
+func (c *HTTPClient) ExecuteCommand(ticket string, command models.YouTrackCommand) error {
 	if ticket == "" {
 		return errors.New("ticket ID is required")
 	}
 
-	if command == "" {
+	if command.Command == "" {
 		return errors.New("command is not specified")
 	}
 
@@ -68,11 +69,11 @@ func (c *HTTPClient) ExecuteCommand(ticket string, command string, comment strin
 
 	// Create the command request with the correct structure
 	commandData := CommandRequest{
-		Query: command,
+		Query: command.Command,
 		Issues: []IssueReference{
 			{IDReadable: ticket},
 		},
-		Comment: comment,
+		Comment: command.Comment,
 	}
 
 	// Convert command data to JSON
