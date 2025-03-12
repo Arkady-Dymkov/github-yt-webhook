@@ -44,7 +44,7 @@
                     "youtrackCommand": [
                         {
                             "command": "Comment",
-                            "comment": "New push made: {{pusher.name}}"
+                            "comment": "New push made: \n by: {{commit_author.name}}\n commit message: {{commit_message}}\n commit hash: {{commit_id}}"
                         }
                     ]
                 }
