@@ -5,9 +5,11 @@ A Golang application that updates YouTrack issues based on GitHub pull request e
 ## Features
 
 - Listens for GitHub webhook events
-- Updates YouTrack issue status to "In Review" when a pull request is opened
+- Updates YouTrack issue status when a pull request is opened, closed, or reopened
 - Extracts ticket ID from pull request title (format: ABC-123)
+- Configurable action mappings between GitHub events and YouTrack commands
 - Built with Gin framework for high performance
+- Comprehensive logging for debugging and monitoring
 
 ## Requirements
 
@@ -21,43 +23,30 @@ The application uses environment variables for configuration:
 - `PORT`: HTTP server port (default: 8080)
 - `YOUTRACK_TEST_URL`: YouTrack API URL
 - `YOUTRACK_TEST_TOKEN`: YouTrack API token
+- `ACTION_MAPPINGS_CONFIG`: Path to action mappings config file (default: "action_mappings.json")
 
-## Development
+### Action Mappings
 
-### Building
+The application uses a JSON configuration file to map GitHub pull request actions to YouTrack commands.
+Create an `action_mappings.json` file with the following structure:
 
-```bash
-# Build the application
-make build
-
-# Run tests
-make test
-```
-# Running
-```bash
-# Set required environment variables
-export YOUTRACK_TEST_URL=https://youtrack.example.com
-export YOUTRACK_TEST_TOKEN=your-api-token
-
-# Run the application
-./github-webhook-youtrack
-```
-
-# Docker Deployment
-
-**Building the Docker image**
-```bash
-make docker-build
-```
-**Run with docker**
-```bash
-make docker-run
-```
-**Running docker compose**
-```bash
-# Start the application
-make docker-up
-
-# Stop the application
-make docker-down
-```
+```json
+{
+    "mappings": [
+        {
+            "githubAction": "opened",
+            "youtrackCommand": "State In Review",
+            "comment": "Pull request opened: {{PR_URL}}"
+        },
+        {
+            "githubAction": "closed",
+            "youtrackCommand": "State Done",
+            "comment": "Pull request merged: {{PR_URL}}"
+        },
+        {
+            "githubAction": "reopened",
+            "youtrackCommand": "State In Progress",
+            "comment": "Pull request reopened: {{PR_URL}}"
+        }
+    ]
+}
