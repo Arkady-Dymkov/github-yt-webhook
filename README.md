@@ -4,6 +4,7 @@ A Golang application that updates YouTrack issues based on GitHub pull request e
 
 ## Features
 
+
 - Listens for GitHub webhook events
 - Updates YouTrack issue status to "In Review" when a pull request is opened
 - Extracts ticket ID from pull request title (format: ABC-123)
