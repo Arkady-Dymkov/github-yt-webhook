@@ -64,7 +64,7 @@ func (c *HTTPClient) UpdateIssueStatus(ticket string) error {
 
 	// Create the command request with the correct structure
 	commandData := CommandRequest{
-		Query: "In Review",
+		Query: "In Progress",
 		Issues: []IssueReference{
 			{IDReadable: ticket},
 		},
