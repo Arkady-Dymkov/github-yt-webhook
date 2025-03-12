@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"log"
 	"net/http"
 	"strings"
 )
@@ -19,6 +20,18 @@ type HTTPClient struct {
 	baseURL string
 	token   string
 	client  *http.Client
+}
+
+// IssueReference represents a reference to a YouTrack issue
+type IssueReference struct {
+	IDReadable string `json:"idReadable"`
+}
+
+// CommandRequest represents the request structure for YouTrack commands
+type CommandRequest struct {
+	Query   string           `json:"query"`
+	Issues  []IssueReference `json:"issues"`
+	Comment string           `json:"comment,omitempty"`
 }
 
 // NewClient creates a new YouTrack client
@@ -48,9 +61,14 @@ func (c *HTTPClient) UpdateIssueStatus(ticket string) error {
 
 	// Prepare the command to update the issue status
 	commandURL := fmt.Sprintf("%s/api/commands", c.baseURL)
-	commandData := map[string]string{
-		"query":   ticket + " Duplicate",
-		"comment": "Status updated by GitHub webhook",
+
+	// Create the command request with the correct structure
+	commandData := CommandRequest{
+		Query: "In Review",
+		Issues: []IssueReference{
+			{IDReadable: ticket},
+		},
+		Comment: "Status updated by GitHub webhook",
 	}
 
 	// Convert command data to JSON
@@ -58,6 +76,9 @@ func (c *HTTPClient) UpdateIssueStatus(ticket string) error {
 	if err != nil {
 		return fmt.Errorf("failed to marshal command data: %w", err)
 	}
+
+	// Debug log - print the request body
+	log.Printf("YouTrack API Request Body: %s", string(jsonData))
 
 	// Create request
 	req, err := http.NewRequest("POST", commandURL, bytes.NewBuffer(jsonData))
@@ -69,6 +90,12 @@ func (c *HTTPClient) UpdateIssueStatus(ticket string) error {
 	req.Header.Set("Content-Type", "application/json")
 	req.Header.Set("Authorization", "Bearer "+c.token)
 
+	// Debug log - print the complete request details
+	log.Printf("YouTrack API Request: %s %s", req.Method, req.URL.String())
+	log.Printf("YouTrack API Request Headers: Content-Type: %s, Authorization: Bearer %s***",
+		req.Header.Get("Content-Type"),
+		c.token[:4]) // Only show first 4 chars of token for security
+
 	// Send request
 	resp, err := c.client.Do(req)
 	if err != nil {
@@ -76,9 +103,22 @@ func (c *HTTPClient) UpdateIssueStatus(ticket string) error {
 	}
 	defer resp.Body.Close()
 
+	// Debug log - print the response status
+	log.Printf("YouTrack API Response Status: %d %s", resp.StatusCode, resp.Status)
+
+	// Read and log response body for debugging
+	var responseBody bytes.Buffer
+	_, err = responseBody.ReadFrom(resp.Body)
+	if err != nil {
+		log.Printf("Error reading response body: %v", err)
+	} else {
+		log.Printf("YouTrack API Response Body: %s", responseBody.String())
+	}
+
 	// Check response status
 	if resp.StatusCode != http.StatusOK {
-		return fmt.Errorf("YouTrack API returned non-OK status: %d", resp.StatusCode)
+		return fmt.Errorf("YouTrack API returned non-OK status: %d, body: %s",
+			resp.StatusCode, responseBody.String())
 	}
 
 	return nil
