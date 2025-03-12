@@ -3,6 +3,7 @@ package config
 import (
 	"encoding/json"
 	"fmt"
+	"log
 	"os"
 	"strings"
 
@@ -11,10 +12,10 @@ import (
 
 // Config holds all configuration for the application
 type Config struct {
-	Port           string
-	YouTrackURL    string
-	YouTrackToken  string
-	ActionMappings map[string]models.ActionMapping
+	Port          string
+	YouTrackURL   string
+	YouTrackToken string
+	EventMapping  map[string]models.EventMapping
 }
 
 // Load loads configuration from environment variables
@@ -28,10 +29,10 @@ func Load() (*Config, error) {
 	ytToken := removeQuotes(os.Getenv("YOUTRACK_TEST_TOKEN"))
 
 	config := &Config{
-		Port:           port,
-		YouTrackURL:    ytURL,
-		YouTrackToken:  ytToken,
-		ActionMappings: make(map[string]models.ActionMapping),
+		Port:          port,
+		YouTrackURL:   ytURL,
+		YouTrackToken: ytToken,
+		EventMapping:  make(map[string]models.EventMapping),
 	}
 
 	// Load action mappings from config file
@@ -67,16 +68,38 @@ func (c *Config) loadActionMappings() error {
 		return fmt.Errorf("error reading config file: %w", err)
 	}
 
-	var mappingConfig models.ActionMappingConfig
+	var mappingConfig struct {
+		Mappings []struct {
+			EventName     string                `json:"eventName"`
+			GitHubActions []models.GitHubAction `json:"githubActions"`
+		} `json:"mappings"`
+	}
+
 	if err := json.Unmarshal(data, &mappingConfig); err != nil {
 		return fmt.Errorf("error parsing config file: %w", err)
 	}
 
-	// Convert to map for easier lookup
+	c.EventMapping = make(map[string]models.EventMapping)
+
 	for _, mapping := range mappingConfig.Mappings {
-		c.ActionMappings[mapping.GitHubAction] = mapping
+		githubActionsMap := make(map[string]models.GitHubAction)
+		for _, action := range mapping.GitHubActions {
+			githubActionsMap[action.GitHubAction] = action
+		}
+
+		c.EventMapping[mapping.EventName] = models.EventMapping{
+			EventName:     mapping.EventName,
+			GitHubActions: githubActionsMap,
+		}
 	}
 
+	// Log the loaded structure
+	jsonData, err := json.MarshalIndent(c.EventMapping, "", "  ")
+	if err != nil {
+		log.Printf("Error marshaling EventMapping for logging: %v", err)
+	} else {
+		log.Printf("Loaded EventMapping:\n%s", jsonData)
+	}
 	return nil
 }
 
@@ -116,11 +139,11 @@ func (c *Config) String() string {
 	}
 
 	return fmt.Sprintf(
-		"Config{Port: %s, YouTrackURL: %s, YouTrackToken: %s, ActionMappings: %d}",
+		"Config{Port: %s, YouTrackURL: %s, YouTrackToken: %s, EventMapping: %d}",
 		c.Port,
 		c.YouTrackURL,
 		maskedToken,
-		len(c.ActionMappings),
+		len(c.EventMapping),
 	)
 }
 

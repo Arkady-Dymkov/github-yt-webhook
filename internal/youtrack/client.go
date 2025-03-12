@@ -5,15 +5,16 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github-yt-webhook/internal/models"
 	"log"
 	"net/http"
 	"strings"
+
+	"github-yt-webhook/internal/models"
 )
 
 // Client interface for YouTrack operations
 type Client interface {
-	ExecuteCommands(ticket string, commands []models.YouTrackCommand) error
+	ExecuteCommands(issueExtractable models.IssueExtractable, commands []models.YouTrackCommand) error
 }
 
 // HTTPClient is the implementation of the Client interface
@@ -54,9 +55,9 @@ func NewClient(baseURL, token string) (*HTTPClient, error) {
 	}, nil
 }
 
-func (c *HTTPClient) ExecuteCommands(ticket string, commands []models.YouTrackCommand) error {
+func (c *HTTPClient) ExecuteCommands(issueExtractable models.IssueExtractable, commands []models.YouTrackCommand) error {
 	for _, command := range commands {
-		var err = c.ExecuteCommand(ticket, command)
+		var err = c.ExecuteCommand(issueExtractable, command)
 		if err != nil {
 			return err
 		}
@@ -65,7 +66,9 @@ func (c *HTTPClient) ExecuteCommands(ticket string, commands []models.YouTrackCo
 }
 
 // ExecuteCommand executes a YouTrack command on an issue
-func (c *HTTPClient) ExecuteCommand(ticket string, command models.YouTrackCommand) error {
+func (c *HTTPClient) ExecuteCommand(issueExtractable models.IssueExtractable, command models.YouTrackCommand) error {
+
+	ticket := issueExtractable.GitIssueNumber()
 	if ticket == "" {
 		return errors.New("ticket ID is required")
 	}
@@ -83,7 +86,7 @@ func (c *HTTPClient) ExecuteCommand(ticket string, command models.YouTrackComman
 		Issues: []IssueReference{
 			{IDReadable: ticket},
 		},
-		Comment: command.Comment,
+		Comment: issueExtractable.FillComment(command.Comment),
 	}
 
 	// Convert command data to JSON

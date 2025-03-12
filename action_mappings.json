@@ -1,33 +1,38 @@
 {
     "mappings": [
         {
-            "githubAction": "opened",
-            "youtrackCommand": [
+            "eventName": "pull_request",
+            "githubActions": [
                 {
-                    "command": "In Progress",
-                    "comment": "PR opened - status updated by GitHub webhook"
+                    "githubAction": "opened",
+                    "youtrackCommand": [
+                        {
+                            "command": "In Progress",
+                            "comment": "PR opened - status updated by GitHub webhook"
+                        },
+                        {
+                            "command": "Comment",
+                            "comment": "Check commit here: {{html_url}}"
+                        }
+                    ]
                 },
                 {
-                    "command": "Comment",
-                    "comment": "Check commit here: {{html_url}}"
-                }
-            ]
-        },
-        {
-            "githubAction": "closed",
-            "youtrackCommand": [
+                    "githubAction": "closed",
+                    "youtrackCommand": [
+                        {
+                            "command": "Done",
+                            "comment": "PR closed - status updated by GitHub webhook"
+                        }
+                    ]
+                },
                 {
-                    "command": "Done",
-                    "comment": "PR closed - status updated by GitHub webhook"
-                }
-            ]
-        },
-        {
-            "githubAction": "reopened",
-            "youtrackCommand": [
-                {
-                    "command": "In Progress",
-                    "comment": "PR reopened - status updated by GitHub webhook"
+                    "githubAction": "reopened",
+                    "youtrackCommand": [
+                        {
+                            "command": "In Progress",
+                            "comment": "PR reopened - status updated by GitHub webhook"
+                        }
+                    ]
                 }
             ]
         }
