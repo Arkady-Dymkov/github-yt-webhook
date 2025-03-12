@@ -1,0 +1,245 @@
+{
+    "info": {
+        "_postman_id": "b5e3f8d1-7c8e-4a5e-9a9c-f8d1e5a9c7e8",
+        "name": "GitHub YouTrack Webhook",
+        "description": "Collection for testing the GitHub YouTrack webhook integration",
+        "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+    },
+    "item": [
+        {
+            "name": "Health Check",
+            "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                    "raw": "{{baseUrl}}/health",
+                    "host": [
+                        "{{baseUrl}}"
+                    ],
+                    "path": [
+                        "health"
+                    ]
+                },
+                "description": "Check if the service is up and running"
+            },
+            "response": []
+        },
+        {
+            "name": "Pull Request Opened",
+            "request": {
+                "method": "POST",
+                "header": [
+                    {
+                        "key": "X-GitHub-Event",
+                        "value": "pull_request",
+                        "type": "text"
+                    },
+                    {
+                        "key": "Content-Type",
+                        "value": "application/json",
+                        "type": "text"
+                    }
+                ],
+                "body": {
+                    "mode": "raw",
+                    "raw": "{\n    \"action\": \"opened\",\n    \"pull_request\": {\n        \"title\": \"ABC-123: Fix critical bug\",\n        \"number\": 42,\n        \"html_url\": \"https://github.com/yourusername/repo/pull/42\",\n        \"user\": {\n            \"login\": \"developer\"\n        },\n        \"body\": \"This PR fixes a critical bug in the authentication system.\"\n    },\n    \"repository\": {\n        \"full_name\": \"yourusername/repo\"\n    }\n}",
+                    "options": {
+                        "raw": {
+                            "language": "json"
+                        }
+                    }
+                },
+                "url": {
+                    "raw": "{{baseUrl}}/webhook",
+                    "host": [
+                        "{{baseUrl}}"
+                    ],
+                    "path": [
+                        "webhook"
+                    ]
+                },
+                "description": "Simulate a GitHub webhook event for an opened pull request with a valid ticket ID"
+            },
+            "response": []
+        },
+        {
+            "name": "Pull Request Closed",
+            "request": {
+                "method": "POST",
+                "header": [
+                    {
+                        "key": "X-GitHub-Event",
+                        "value": "pull_request",
+                        "type": "text"
+                    },
+                    {
+                        "key": "Content-Type",
+                        "value": "application/json",
+                        "type": "text"
+                    }
+                ],
+                "body": {
+                    "mode": "raw",
+                    "raw": "{\n    \"action\": \"closed\",\n    \"pull_request\": {\n        \"title\": \"ABC-123: Fix critical bug\",\n        \"number\": 42,\n        \"html_url\": \"https://github.com/yourusername/repo/pull/42\",\n        \"user\": {\n            \"login\": \"developer\"\n        },\n        \"body\": \"This PR fixes a critical bug in the authentication system.\",\n        \"merged\": true\n    },\n    \"repository\": {\n        \"full_name\": \"yourusername/repo\"\n    }\n}",
+                    "options": {
+                        "raw": {
+                            "language": "json"
+                        }
+                    }
+                },
+                "url": {
+                    "raw": "{{baseUrl}}/webhook",
+                    "host": [
+                        "{{baseUrl}}"
+                    ],
+                    "path": [
+                        "webhook"
+                    ]
+                },
+                "description": "Simulate a GitHub webhook event for a closed pull request (should be ignored)"
+            },
+            "response": []
+        },
+        {
+            "name": "Pull Request No Ticket",
+            "request": {
+                "method": "POST",
+                "header": [
+                    {
+                        "key": "X-GitHub-Event",
+                        "value": "pull_request",
+                        "type": "text"
+                    },
+                    {
+                        "key": "Content-Type",
+                        "value": "application/json",
+                        "type": "text"
+                    }
+                ],
+                "body": {
+                    "mode": "raw",
+                    "raw": "{\n    \"action\": \"opened\",\n    \"pull_request\": {\n        \"title\": \"Fix critical bug without ticket reference\",\n        \"number\": 43,\n        \"html_url\": \"https://github.com/yourusername/repo/pull/43\",\n        \"user\": {\n            \"login\": \"developer\"\n        },\n        \"body\": \"This PR fixes a critical bug in the authentication system.\"\n    },\n    \"repository\": {\n        \"full_name\": \"yourusername/repo\"\n    }\n}",
+                    "options": {
+                        "raw": {
+                            "language": "json"
+                        }
+                    }
+                },
+                "url": {
+                    "raw": "{{baseUrl}}/webhook",
+                    "host": [
+                        "{{baseUrl}}"
+                    ],
+                    "path": [
+                        "webhook"
+                    ]
+                },
+                "description": "Simulate a GitHub webhook event for an opened pull request without a ticket ID"
+            },
+            "response": []
+        },
+        {
+            "name": "Push Event",
+            "request": {
+                "method": "POST",
+                "header": [
+                    {
+                        "key": "X-GitHub-Event",
+                        "value": "push",
+                        "type": "text"
+                    },
+                    {
+                        "key": "Content-Type",
+                        "value": "application/json",
+                        "type": "text"
+                    }
+                ],
+                "body": {
+                    "mode": "raw",
+                    "raw": "{\n    \"ref\": \"refs/heads/main\",\n    \"before\": \"abc123\",\n    \"after\": \"def456\",\n    \"repository\": {\n        \"full_name\": \"yourusername/repo\"\n    },\n    \"pusher\": {\n        \"name\": \"developer\"\n    },\n    \"commits\": [\n        {\n            \"id\": \"def456\",\n            \"message\": \"ABC-123: Fix critical bug\",\n            \"timestamp\": \"2023-01-01T12:00:00Z\",\n            \"author\": {\n                \"name\": \"Developer\",\n                \"email\": \"developer@example.com\"\n            }\n        }\n    ]\n}",
+                    "options": {
+                        "raw": {
+                            "language": "json"
+                        }
+                    }
+                },
+                "url": {
+                    "raw": "{{baseUrl}}/webhook",
+                    "host": [
+                        "{{baseUrl}}"
+                    ],
+                    "path": [
+                        "webhook"
+                    ]
+                },
+                "description": "Simulate a GitHub webhook event for a push (should be ignored)"
+            },
+            "response": []
+        },
+        {
+            "name": "Invalid JSON",
+            "request": {
+                "method": "POST",
+                "header": [
+                    {
+                        "key": "X-GitHub-Event",
+                        "value": "pull_request",
+                        "type": "text"
+                    },
+                    {
+                        "key": "Content-Type",
+                        "value": "application/json",
+                        "type": "text"
+                    }
+                ],
+                "body": {
+                    "mode": "raw",
+                    "raw": "{\n    \"action\": \"opened\",\n    \"pull_request\": {\n        \"title\": \"ABC-123: Fix critical bug\",\n        \"number\": 42,\n        \"html_url\": \"https://github.com/yourusername/repo/pull/42\",\n        \"user\": {\n            \"login\": \"developer\"\n        },\n        \"body\": \"This PR fixes a critical bug in the authentication system.\"\n    },\n    \"repository\": {\n        \"full_name\": \"yourusername/repo\"\n    ",
+                    "options": {
+                        "raw": {
+                            "language": "json"
+                        }
+                    }
+                },
+                "url": {
+                    "raw": "{{baseUrl}}/webhook",
+                    "host": [
+                        "{{baseUrl}}"
+                    ],
+                    "path": [
+                        "webhook"
+                    ]
+                },
+                "description": "Send invalid JSON to test error handling"
+            },
+            "response": []
+        }
+    ],
+    "event": [
+        {
+            "listen": "prerequest",
+            "script": {
+                "type": "text/javascript",
+                "exec": [
+                    ""
+                ]
+            }
+        },
+        {
+            "listen": "test",
+            "script": {
+                "type": "text/javascript",
+                "exec": [
+                    ""
+                ]
+            }
+        }
+    ],
+    "variable": [
+        {
+            "key": "baseUrl",
+            "value": "http://localhost:8080",
+            "type": "string"
+        }
+    ]
+}
