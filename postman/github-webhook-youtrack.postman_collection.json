@@ -96,7 +96,45 @@
                         "webhook"
                     ]
                 },
-                "description": "Simulate a GitHub webhook event for a closed pull request (should be ignored)"
+                "description": "Simulate a GitHub webhook event for a closed pull request"
+            },
+            "response": []
+        },
+        {
+            "name": "Pull Request Reopened",
+            "request": {
+                "method": "POST",
+                "header": [
+                    {
+                        "key": "X-GitHub-Event",
+                        "value": "pull_request",
+                        "type": "text"
+                    },
+                    {
+                        "key": "Content-Type",
+                        "value": "application/json",
+                        "type": "text"
+                    }
+                ],
+                "body": {
+                    "mode": "raw",
+                    "raw": "{\n    \"action\": \"reopened\",\n    \"pull_request\": {\n        \"title\": \"ABC-123: Fix critical bug\",\n        \"number\": 42,\n        \"html_url\": \"https://github.com/yourusername/repo/pull/42\",\n        \"user\": {\n            \"login\": \"developer\"\n        },\n        \"body\": \"This PR fixes a critical bug in the authentication system.\"\n    },\n    \"repository\": {\n        \"full_name\": \"yourusername/repo\"\n    }\n}",
+                    "options": {
+                        "raw": {
+                            "language": "json"
+                        }
+                    }
+                },
+                "url": {
+                    "raw": "{{baseUrl}}/webhook",
+                    "host": [
+                        "{{baseUrl}}"
+                    ],
+                    "path": [
+                        "webhook"
+                    ]
+                },
+                "description": "Simulate a GitHub webhook event for a reopened pull request"
             },
             "response": []
         },
