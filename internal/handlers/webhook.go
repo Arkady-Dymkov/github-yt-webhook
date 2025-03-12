@@ -3,7 +3,6 @@ package handlers
 import (
 	"log"
 	"net/http"
-	"regexp"
 	"strings"
 
 	"github-yt-webhook/internal/config"
@@ -28,63 +27,75 @@ func NewWebhookHandler(ytClient youtrack.Client, config *config.Config) *Webhook
 
 // HandleGitHubWebhook handles GitHub webhook events
 func (h *WebhookHandler) HandleGitHubWebhook(c *gin.Context) {
-	// Check if the event is a pull_request event
+	// Check if the events is a pull_request events
 	eventType := c.GetHeader("X-GitHub-Event")
 
 	actionsMapping, exists := h.config.EventMapping[eventType]
 	if !exists {
-		log.Printf("Ignored event type: %s", eventType)
+		log.Printf("Ignored events type: %s", eventType)
 		c.String(http.StatusOK, "Event ignored")
 		return
 	}
 
-	event, err := bindGithubEvent(eventType, c)
+	events, err := bindGithubEvent(eventType, c)
 	if err != nil {
 		log.Printf("Error binding JSON: %v", err)
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid JSON"})
 		return
 	}
 
-	// Check if we have a mapping for this action
-	mapping, exists := actionsMapping.GitHubActions[event.GetAction()]
-	if !exists {
-		log.Printf("Ignored pull_request action: %s (no mapping configured)", event.GetAction())
-		c.String(http.StatusOK, "Action ignored (no mapping configured)")
-		return
-	}
+	h.processEvents(events, actionsMapping.GitHubActions)
 
-	// Send request to YouTrack to update the issue status using the configured command
-	err = h.ytClient.ExecuteCommands(event, mapping.YouTrackCommand)
-	if err != nil {
-		log.Printf("Failed to complete hook: %v", err)
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to complete hook: " + err.Error()})
-		return
-	}
-
-	log.Printf("YouTrack issue %s updated with command '%s'", event.GitIssueNumber(), mapping.YouTrackCommand)
-
-	c.String(http.StatusOK, "Issue "+event.GitIssueNumber()+" updated")
+	c.String(http.StatusOK, "Issues "+strings.Join(collectsIssuesNumbers(events), ", ")+" updated")
 }
 
-// extractTicket extracts a ticket ID from a pull request title
-func extractTicket(title string) string {
-	// Assuming ticket format like ABC-123
-	re := regexp.MustCompile(`[A-Z]+-\d+`)
-	ticket := re.FindString(title)
-	return strings.TrimSpace(ticket)
+func (h *WebhookHandler) processEvents(events []models.GitHubEvent, actionsMapping map[string]models.GitHubAction) {
+	for _, event := range events {
+		mapping, exists := actionsMapping[event.GetAction()]
+		if !exists {
+			log.Printf("Ignored pull_request action: %s (no mapping configured)", event.GetAction())
+			continue
+		}
+
+		// Send request to YouTrack to update the issue status using the configured command
+		err := h.ytClient.ExecuteCommands(event, mapping.YouTrackCommand)
+		if err != nil {
+			log.Printf("Failed to complete hook: %v", err)
+			continue
+		}
+
+		log.Printf("YouTrack issue %s updated with command '%s'", event.GitIssueNumber(), mapping.YouTrackCommand)
+	}
 }
 
-func bindGithubEvent(eventType string, context *gin.Context) (models.GitHubEvent, error) {
-	var event models.GitHubEvent
+func collectsIssuesNumbers(events []models.GitHubEvent) []string {
+	var issues []string
+	for _, event := range events {
+		issues = append(issues, event.GitIssueNumber())
+	}
+	return issues
+}
+
+func bindGithubEvent(eventType string, context *gin.Context) ([]models.GitHubEvent, error) {
+	var events []models.GitHubEvent
 	switch eventType {
 	case "pull_request":
 		var prEvent models.PullRequestEvent
 		if err := context.ShouldBindJSON(&prEvent); err != nil {
 			return nil, err
 		}
-		event = &prEvent
+		events = append(events, &prEvent)
+	case "push":
+		var pushEvent models.PushEvent
+		if err := context.ShouldBindJSON(&pushEvent); err != nil {
+			return nil, err
+		}
+		for _, commit := range pushEvent.Commits {
+			events = append(events, &commit)
+		}
+
 	default:
 		return nil, nil
 	}
-	return event, nil
+	return events, nil
 }

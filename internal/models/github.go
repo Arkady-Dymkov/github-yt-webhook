@@ -5,6 +5,20 @@ import (
 	"strings"
 )
 
+type ActionableEvent interface {
+	GetAction() string
+}
+
+type IssueExtractable interface {
+	GitIssueNumber() string
+	FillComment(str string) string
+}
+
+type GitHubEvent interface {
+	ActionableEvent
+	IssueExtractable
+}
+
 // PullRequestEvent represents a GitHub pull request event
 type PullRequestEvent struct {
 	Action      string      `json:"action"`
@@ -18,18 +32,38 @@ type PullRequest struct {
 	// Add other fields as needed
 }
 
-type ActionableEvent interface {
-	GetAction() string
+type PushEvent struct {
+	Commits []Commit `json:"commits"`
 }
 
-type IssueExtractable interface {
-	GitIssueNumber() string
-	FillComment(str string) string
+type Commit struct {
+	Id      string `json:"id"`
+	Message string `json:"message"`
+	Author  Author `json:"author"`
 }
 
-type GitHubEvent interface {
-	ActionableEvent
-	IssueExtractable
+type Author struct {
+	Name  string `json:"name"`
+	Email string `json:"email"`
+}
+
+func (c *Commit) GetAction() string {
+	return "any"
+}
+
+func (c *Commit) GitIssueNumber() string {
+	return extractTicket(c.Message)
+}
+
+func (c *Commit) FillComment(str string) string {
+	replacements := map[string]string{
+		"{{commit_id}}":           c.Id,
+		"{{commit_message}}":      c.Message,
+		"{{commit_author.name}}":  c.Author.Name,
+		"{{commit_author.email}}": c.Author.Email,
+	}
+
+	return replaceMultiple(str, replacements)
 }
 
 func (pr *PullRequestEvent) GetAction() string {
