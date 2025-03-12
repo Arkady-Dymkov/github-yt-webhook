@@ -33,13 +33,16 @@ func New(config *config.Config) (*Server, error) {
 	}
 
 	// Create webhook handler
-	webhookHandler := handlers.NewWebhookHandler(ytClient)
+	webhookHandler := handlers.NewWebhookHandler(ytClient, config)
 
 	// Set up Gin router
 	router := gin.Default()
 
 	// Register routes
 	router.POST("/webhook", webhookHandler.HandleGitHubWebhook)
+
+	// Default GitHub ping
+	router.POST("/", func(c *gin.Context) { c.Status(200) })
 
 	// Add a health check endpoint
 	router.GET("/health", func(c *gin.Context) {

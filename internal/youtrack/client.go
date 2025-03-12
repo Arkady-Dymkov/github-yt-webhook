@@ -12,7 +12,7 @@ import (
 
 // Client interface for YouTrack operations
 type Client interface {
-	UpdateIssueStatus(ticket string) error
+	ExecuteCommand(ticket string, command string, comment string) error
 }
 
 // HTTPClient is the implementation of the Client interface
@@ -53,10 +53,14 @@ func NewClient(baseURL, token string) (*HTTPClient, error) {
 	}, nil
 }
 
-// UpdateIssueStatus updates the status of a YouTrack issue to "In Review"
-func (c *HTTPClient) UpdateIssueStatus(ticket string) error {
+// ExecuteCommand executes a YouTrack command on an issue
+func (c *HTTPClient) ExecuteCommand(ticket string, command string, comment string) error {
 	if ticket == "" {
 		return errors.New("ticket ID is required")
+	}
+
+	if command == "" {
+		return errors.New("command is not specified")
 	}
 
 	// Prepare the command to update the issue status
@@ -64,11 +68,11 @@ func (c *HTTPClient) UpdateIssueStatus(ticket string) error {
 
 	// Create the command request with the correct structure
 	commandData := CommandRequest{
-		Query: "In Progress",
+		Query: command,
 		Issues: []IssueReference{
 			{IDReadable: ticket},
 		},
-		Comment: "Status updated by GitHub webhook",
+		Comment: comment,
 	}
 
 	// Convert command data to JSON

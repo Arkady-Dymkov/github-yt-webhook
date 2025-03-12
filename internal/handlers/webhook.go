@@ -7,6 +7,7 @@ import (
 	"strings"
 
 	"github.com/gin-gonic/gin"
+	"github-yt-webhook/internal/config"
 	"github-yt-webhook/internal/models"
 	"github-yt-webhook/internal/youtrack"
 )
@@ -14,12 +15,14 @@ import (
 // WebhookHandler handles GitHub webhook requests
 type WebhookHandler struct {
 	ytClient youtrack.Client
+	config   *config.Config
 }
 
 // NewWebhookHandler creates a new webhook handler
-func NewWebhookHandler(ytClient youtrack.Client) *WebhookHandler {
+func NewWebhookHandler(ytClient youtrack.Client, config *config.Config) *WebhookHandler {
 	return &WebhookHandler{
 		ytClient: ytClient,
+		config:   config,
 	}
 }
 
@@ -40,10 +43,11 @@ func (h *WebhookHandler) HandleGitHubWebhook(c *gin.Context) {
 		return
 	}
 
-	// Process only "opened" pull request actions
-	if prEvent.Action != "opened" {
-		log.Printf("Ignored pull_request action: %s", prEvent.Action)
-		c.String(http.StatusOK, "Action ignored")
+	// Check if we have a mapping for this action
+	mapping, exists := h.config.ActionMappings[prEvent.Action]
+	if !exists {
+		log.Printf("Ignored pull_request action: %s (no mapping configured)", prEvent.Action)
+		c.String(http.StatusOK, "Action ignored (no mapping configured)")
 		return
 	}
 
@@ -54,15 +58,15 @@ func (h *WebhookHandler) HandleGitHubWebhook(c *gin.Context) {
 		return
 	}
 
-	// Send request to YouTrack to update the issue status
-	err := h.ytClient.UpdateIssueStatus(ticket)
+	// Send request to YouTrack to update the issue status using the configured command
+	err := h.ytClient.ExecuteCommand(ticket, mapping.YouTrackCommand, mapping.Comment)
 	if err != nil {
 		log.Printf("Failed to update YouTrack issue %s: %v", ticket, err)
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update YouTrack issue"})
 		return
 	}
 
-	log.Printf("YouTrack issue %s updated to status 'In Review'", ticket)
+	log.Printf("YouTrack issue %s updated with command '%s'", ticket, mapping.YouTrackCommand)
 	c.String(http.StatusOK, "Issue "+ticket+" updated")
 }
 

@@ -1,16 +1,20 @@
 package config
 
 import (
+	"encoding/json"
 	"fmt"
 	"os"
 	"strings"
+
+	"github-yt-webhook/internal/models"
 )
 
 // Config holds all configuration for the application
 type Config struct {
-	Port          string
-	YouTrackURL   string
-	YouTrackToken string
+	Port           string
+	YouTrackURL    string
+	YouTrackToken  string
+	ActionMappings map[string]models.ActionMapping
 }
 
 // Load loads configuration from environment variables
@@ -24,9 +28,15 @@ func Load() (*Config, error) {
 	ytToken := removeQuotes(os.Getenv("YOUTRACK_TEST_TOKEN"))
 
 	config := &Config{
-		Port:          port,
-		YouTrackURL:   ytURL,
-		YouTrackToken: ytToken,
+		Port:           port,
+		YouTrackURL:    ytURL,
+		YouTrackToken:  ytToken,
+		ActionMappings: make(map[string]models.ActionMapping),
+	}
+
+	// Load action mappings from config file
+	if err := config.loadActionMappings(); err != nil {
+		return nil, fmt.Errorf("failed to load action mappings: %w", err)
 	}
 
 	// Validate the configuration
@@ -35,6 +45,39 @@ func Load() (*Config, error) {
 	}
 
 	return config, nil
+}
+
+// loadActionMappings loads action mappings from a JSON configuration file
+func (c *Config) loadActionMappings() error {
+
+	// Check if config file exists
+	configPath := os.Getenv("ACTION_MAPPINGS_CONFIG")
+	if configPath == "" {
+		configPath = "action_mappings.json"
+	}
+
+	// If file doesn't exist, use default mapping
+	if _, err := os.Stat(configPath); os.IsNotExist(err) {
+		return fmt.Errorf("config file doesn't exists or cannot be read: %w", err)
+	}
+
+	// Read and parse config file
+	data, err := os.ReadFile(configPath)
+	if err != nil {
+		return fmt.Errorf("error reading config file: %w", err)
+	}
+
+	var mappingConfig models.ActionMappingConfig
+	if err := json.Unmarshal(data, &mappingConfig); err != nil {
+		return fmt.Errorf("error parsing config file: %w", err)
+	}
+
+	// Convert to map for easier lookup
+	for _, mapping := range mappingConfig.Mappings {
+		c.ActionMappings[mapping.GitHubAction] = mapping
+	}
+
+	return nil
 }
 
 // Validate checks if the configuration is valid
@@ -73,10 +116,11 @@ func (c *Config) String() string {
 	}
 
 	return fmt.Sprintf(
-		"Config{Port: %s, YouTrackURL: %s, YouTrackToken: %s}",
+		"Config{Port: %s, YouTrackURL: %s, YouTrackToken: %s, ActionMappings: %d}",
 		c.Port,
 		c.YouTrackURL,
 		maskedToken,
+		len(c.ActionMappings),
 	)
 }
 
