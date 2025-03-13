@@ -28,6 +28,9 @@ WORKDIR /app
 # Copy binary from builder stage
 COPY --from=builder /app/github-webhook-youtrack .
 
+# Copy action_mappings.json into the final image
+COPY action_mappings.json .
+
 # Expose port
 EXPOSE 8080
 
