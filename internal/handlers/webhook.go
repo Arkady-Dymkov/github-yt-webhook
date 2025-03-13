@@ -91,7 +91,8 @@ func bindGithubEvent(eventType string, context *gin.Context) ([]models.GitHubEve
 			return nil, err
 		}
 		for _, commit := range pushEvent.Commits {
-			events = append(events, &commit)
+			commitCopy := commit                 // Create a copy of the commit
+			events = append(events, &commitCopy) // Append a pointer to the copy
 		}
 
 	default:
