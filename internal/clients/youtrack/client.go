@@ -38,7 +38,7 @@ type CommandRequest struct {
 }
 
 // NewClient creates a new YouTrack client
-func NewClient(baseURL, token string) (*HTTPClient, error) {
+func NewClient(baseURL, token string) (Client, error) {
 	if baseURL == "" {
 		return nil, errors.New("YouTrack URL is required")
 	}
@@ -49,11 +49,13 @@ func NewClient(baseURL, token string) (*HTTPClient, error) {
 	// Ensure baseURL doesn't end with a slash
 	baseURL = strings.TrimSuffix(baseURL, "/")
 
-	return &HTTPClient{
+	httpClient := &HTTPClient{
 		baseURL: baseURL,
 		token:   token,
 		client:  &http.Client{},
-	}, nil
+	}
+
+	return httpClient, nil
 }
 
 func (c *HTTPClient) ExecuteCommands(issueExtractable github.IssueExtractable, commands []models.YouTrackCommand) error {

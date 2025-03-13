@@ -3,13 +3,13 @@ package server
 import (
 	"context"
 	"errors"
+	"github-yt-webhook/internal/clients/youtrack"
 	"github-yt-webhook/internal/utils"
 	"net/http"
 	"time"
 
 	"github-yt-webhook/internal/config"
 	"github-yt-webhook/internal/handlers"
-	"github-yt-webhook/internal/youtrack"
 	"github.com/gin-gonic/gin"
 )
 

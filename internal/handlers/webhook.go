@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"github-yt-webhook/internal/clients/youtrack"
 	"github-yt-webhook/internal/models/github"
 	"github-yt-webhook/internal/utils"
 	"net/http"
@@ -8,7 +9,6 @@ import (
 
 	"github-yt-webhook/internal/config"
 	"github-yt-webhook/internal/models"
-	"github-yt-webhook/internal/youtrack"
 	"github.com/gin-gonic/gin"
 )
 
