@@ -3,6 +3,7 @@ package config
 import (
 	"encoding/json"
 	"fmt"
+	"github-yt-webhook/internal/utils"
 	"log"
 	"os"
 	"strings"
@@ -98,7 +99,7 @@ func (c *Config) loadActionMappings() error {
 	if err != nil {
 		log.Printf("Error marshaling EventMapping for logging: %v", err)
 	} else {
-		log.Printf("Loaded EventMapping:\n%s", jsonData)
+		utils.Debugf("Loaded EventMapping:\n%s", jsonData)
 	}
 	return nil
 }

@@ -10,6 +10,7 @@ import (
 
 	"github-yt-webhook/internal/config"
 	"github-yt-webhook/internal/server"
+	"github-yt-webhook/internal/utils"
 )
 
 func main() {
@@ -19,8 +20,8 @@ func main() {
 		log.Fatalf("Failed to load configuration: %v", err)
 	}
 
-	// Log configuration (with sen	sitive data masked)
-	log.Printf("Starting with configuration: %s", cfg)
+	// Log configuration (with sensitive data masked)
+	utils.Debugf("Starting with configuration: %s", cfg)
 
 	// Create and start server
 	srv, err := server.New(cfg)

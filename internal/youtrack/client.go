@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github-yt-webhook/internal/utils"
 	"log"
 	"net/http"
 	"strings"
@@ -96,7 +97,7 @@ func (c *HTTPClient) ExecuteCommand(issueExtractable models.IssueExtractable, co
 	}
 
 	// Debug log - print the request body
-	log.Printf("YouTrack API Request Body: %s", string(jsonData))
+	utils.Debugf("YouTrack API Request Body: %s", string(jsonData))
 
 	// Create request
 	req, err := http.NewRequest("POST", commandURL, bytes.NewBuffer(jsonData))
@@ -109,8 +110,8 @@ func (c *HTTPClient) ExecuteCommand(issueExtractable models.IssueExtractable, co
 	req.Header.Set("Authorization", "Bearer "+c.token)
 
 	// Debug log - print the complete request details
-	log.Printf("YouTrack API Request: %s %s", req.Method, req.URL.String())
-	log.Printf("YouTrack API Request Headers: Content-Type: %s, Authorization: Bearer %s***",
+	utils.Debugf("YouTrack API Request: %s %s", req.Method, req.URL.String())
+	utils.Debugf("YouTrack API Request Headers: Content-Type: %s, Authorization: Bearer %s***",
 		req.Header.Get("Content-Type"),
 		c.token[:4]) // Only show first 4 chars of token for security
 
@@ -130,7 +131,7 @@ func (c *HTTPClient) ExecuteCommand(issueExtractable models.IssueExtractable, co
 	if err != nil {
 		log.Printf("Error reading response body: %v", err)
 	} else {
-		log.Printf("YouTrack API Response Body: %s", responseBody.String())
+		utils.Debugf("YouTrack API Response Body: %s", responseBody.String())
 	}
 
 	// Check response status
