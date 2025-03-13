@@ -3,12 +3,11 @@ package config
 import (
 	"encoding/json"
 	"fmt"
-	"github-yt-webhook/internal/utils"
-	"log"
 	"os"
 	"strings"
 
 	"github-yt-webhook/internal/models"
+	"github-yt-webhook/internal/utils"
 )
 
 // Config holds all configuration for the application
@@ -97,7 +96,7 @@ func (c *Config) loadActionMappings() error {
 	// Log the loaded structure
 	jsonData, err := json.MarshalIndent(c.EventMapping, "", "  ")
 	if err != nil {
-		log.Printf("Error marshaling EventMapping for logging: %v", err)
+		utils.Infof("Error marshaling EventMapping for logging: %v", err)
 	} else {
 		utils.Debugf("Loaded EventMapping:\n%s", jsonData)
 	}

@@ -5,12 +5,11 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github-yt-webhook/internal/utils"
-	"log"
 	"net/http"
 	"strings"
 
 	"github-yt-webhook/internal/models"
+	"github-yt-webhook/internal/utils"
 )
 
 // Client interface for YouTrack operations
@@ -123,13 +122,13 @@ func (c *HTTPClient) ExecuteCommand(issueExtractable models.IssueExtractable, co
 	defer resp.Body.Close()
 
 	// Debug log - print the response status
-	log.Printf("YouTrack API Response Status: %d %s", resp.StatusCode, resp.Status)
+	utils.Infof("YouTrack API Response Status: %d %s", resp.StatusCode, resp.Status)
 
 	// Read and log response body for debugging
 	var responseBody bytes.Buffer
 	_, err = responseBody.ReadFrom(resp.Body)
 	if err != nil {
-		log.Printf("Error reading response body: %v", err)
+		utils.Infof("Error reading response body: %v", err)
 	} else {
 		utils.Debugf("YouTrack API Response Body: %s", responseBody.String())
 	}

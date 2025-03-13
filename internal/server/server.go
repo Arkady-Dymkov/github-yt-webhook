@@ -3,14 +3,14 @@ package server
 import (
 	"context"
 	"errors"
-	"log"
+	"github-yt-webhook/internal/utils"
 	"net/http"
 	"time"
 
-	"github.com/gin-gonic/gin"
 	"github-yt-webhook/internal/config"
 	"github-yt-webhook/internal/handlers"
 	"github-yt-webhook/internal/youtrack"
+	"github.com/gin-gonic/gin"
 )
 
 // Server represents the HTTP server
@@ -67,7 +67,7 @@ func New(config *config.Config) (*Server, error) {
 
 // Start starts the HTTP server
 func (s *Server) Start() error {
-	log.Printf("Server starting at port %s", s.config.Port)
+	utils.Infof("Server starting at port %s", s.config.Port)
 	return s.server.ListenAndServe()
 }
 
