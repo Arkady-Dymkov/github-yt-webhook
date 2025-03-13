@@ -9,8 +9,14 @@ type Clients struct {
 	YouTrackClient *youtrack.Client
 }
 
-func CreateClients(c *config.Config) *Clients {
-	return &Clients{
-		YouTrackClient: youtrack.NewClient(c.YouTrackURL, c.YouTrackToken),
+func CreateClients(c *config.Config) (*Clients, error) {
+
+	yt, err := youtrack.NewClient(c.YouTrackURL, c.YouTrackToken)
+	if err != nil {
+		return nil, err
 	}
+
+	return &Clients{
+		YouTrackClient: &yt,
+	}, nil
 }

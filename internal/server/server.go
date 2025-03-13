@@ -3,7 +3,7 @@ package server
 import (
 	"context"
 	"errors"
-	"github-yt-webhook/internal/clients/youtrack"
+	"github-yt-webhook/internal/clients"
 	"github-yt-webhook/internal/utils"
 	"net/http"
 	"time"
@@ -26,14 +26,14 @@ func New(config *config.Config) (*Server, error) {
 		return nil, errors.New("config cannot be nil")
 	}
 
-	// Create YouTrack client
-	ytClient, err := youtrack.NewClient(config.YouTrackURL, config.YouTrackToken)
+	// Create createdClients
+	createdClients, err := clients.CreateClients(config)
 	if err != nil {
 		return nil, err
 	}
 
 	// Create webhook handler
-	webhookHandler := handlers.NewWebhookHandler(ytClient, config)
+	webhookHandler := handlers.NewWebhookHandler(createdClients.YouTrackClient, config)
 
 	// Set up Gin router
 	router := gin.Default()

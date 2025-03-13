@@ -19,9 +19,9 @@ type WebhookHandler struct {
 }
 
 // NewWebhookHandler creates a new webhook handler
-func NewWebhookHandler(ytClient youtrack.Client, config *config.Config) *WebhookHandler {
+func NewWebhookHandler(ytClient *youtrack.Client, config *config.Config) *WebhookHandler {
 	return &WebhookHandler{
-		ytClient: ytClient,
+		ytClient: *ytClient,
 		config:   config,
 	}
 }
