@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"github-yt-webhook/internal/models/github"
 	"github-yt-webhook/internal/utils"
 	"net/http"
 	"strings"
@@ -49,7 +50,7 @@ func (h *WebhookHandler) HandleGitHubWebhook(c *gin.Context) {
 	c.String(http.StatusOK, "Issues "+strings.Join(collectsIssuesNumbers(events), ", ")+" updated")
 }
 
-func (h *WebhookHandler) processEvents(events []models.GitHubEvent, actionsMapping map[string]models.GitHubAction) {
+func (h *WebhookHandler) processEvents(events []github.GitHubEvent, actionsMapping map[string]models.GitHubAction) {
 	for _, event := range events {
 		mapping, exists := actionsMapping[event.GetAction()]
 		if !exists {
@@ -64,29 +65,29 @@ func (h *WebhookHandler) processEvents(events []models.GitHubEvent, actionsMappi
 			continue
 		}
 
-		utils.Infof("YouTrack issue %s updated with command '%s'", event.GitIssueNumber(), mapping.YouTrackCommand)
+		utils.Infof("YouTrack issue %s updated with command '%s'", youtrack.ExtractTicket(event.GetIssueNumberPlace()), mapping.YouTrackCommand)
 	}
 }
 
-func collectsIssuesNumbers(events []models.GitHubEvent) []string {
+func collectsIssuesNumbers(events []github.GitHubEvent) []string {
 	var issues []string
 	for _, event := range events {
-		issues = append(issues, event.GitIssueNumber())
+		issues = append(issues, youtrack.ExtractTicket(event.GetIssueNumberPlace()))
 	}
 	return issues
 }
 
-func bindGithubEvent(eventType string, context *gin.Context) ([]models.GitHubEvent, error) {
-	var events []models.GitHubEvent
+func bindGithubEvent(eventType string, context *gin.Context) ([]github.GitHubEvent, error) {
+	var events []github.GitHubEvent
 	switch eventType {
 	case "pull_request":
-		var prEvent models.PullRequestEvent
+		var prEvent github.PullRequestEvent
 		if err := context.ShouldBindJSON(&prEvent); err != nil {
 			return nil, err
 		}
 		events = append(events, &prEvent)
 	case "push":
-		var pushEvent models.PushEvent
+		var pushEvent github.PushEvent
 		if err := context.ShouldBindJSON(&pushEvent); err != nil {
 			return nil, err
 		}
