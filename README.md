@@ -34,19 +34,55 @@ Create an `action_mappings.json` file with the following structure:
 {
     "mappings": [
         {
-            "githubAction": "opened",
-            "youtrackCommand": "State In Review",
-            "comment": "Pull request opened: {{PR_URL}}"
+            "eventName": "pull_request",
+            "githubActions": [
+                {
+                    "githubAction": "opened",
+                    "youtrackCommand": [
+                        {
+                            "command": "In Progress",
+                            "comment": "PR opened - status updated by GitHub webhook"
+                        },
+                        {
+                            "command": "Comment",
+                            "comment": "Check commit here: {{html_url}}"
+                        }
+                    ]
+                },
+                {
+                    "githubAction": "closed",
+                    "youtrackCommand": [
+                        {
+                            "command": "Done",
+                            "comment": "PR closed - status updated by GitHub webhook"
+                        }
+                    ]
+                },
+                {
+                    "githubAction": "reopened",
+                    "youtrackCommand": [
+                        {
+                            "command": "In Progress",
+                            "comment": "PR reopened - status updated by GitHub webhook"
+                        }
+                    ]
+                }
+            ]
         },
         {
-            "githubAction": "closed",
-            "youtrackCommand": "State Done",
-            "comment": "Pull request merged: {{PR_URL}}"
-        },
-        {
-            "githubAction": "reopened",
-            "youtrackCommand": "State In Progress",
-            "comment": "Pull request reopened: {{PR_URL}}"
+            "eventName": "push",
+            "githubActions": [
+                {
+                    "githubAction": "any",
+                    "youtrackCommand": [
+                        {
+                            "command": "Comment",
+                            "comment": "New push made: \n by: {{commit_author.name}}\n commit message: {{commit_message}}\n commit hash: {{commit_id}}"
+                        }
+                    ]
+                }
+            ]
         }
     ]
 }
+```

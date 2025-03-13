@@ -31,6 +31,11 @@ COPY --from=builder /app/github-webhook-youtrack .
 # Copy action_mappings.json into the final image
 COPY action_mappings.json .
 
+# Add labels for GitHub Packages
+LABEL org.opencontainers.image.source="https://github.com/Arkady-Dymkov/github-yt-webhook.git"
+LABEL org.opencontainers.image.description="GitHub webhook integration for YouTrack"
+LABEL org.opencontainers.image.licenses="MIT"
+
 # Expose port
 EXPOSE 8080
 
